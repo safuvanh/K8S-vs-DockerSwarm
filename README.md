@@ -78,7 +78,7 @@ Nodes are individual instances of the Docker engine that control your cluster an
   ```
   <br>
   Alternatively, if you are the root user, you can run:
-  ```
+   ```
    export KUBECONFIG=/etc/kubernetes/admin.conf
    ```
 - You can get the cluster info using the following command.`kubectl cluster-info `
