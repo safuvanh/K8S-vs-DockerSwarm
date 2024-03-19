@@ -160,10 +160,11 @@ Nodes are individual instances of the Docker engine that control your cluster an
 
 ### Add Kubeadm Config to Workstation
 - If you prefer to connect the Kubeadm cluster using kubectl from your workstation, you can merge the kubeadm `admin.conf` with your existing kubeconfig file.
-- Follow the steps given below for the configuration.
+- Follow the steps given below for the configuration.<br>
   Step 1: Copy the contents of `admin.conf` from the control plane node and save it in a file named `kubeadm-config.yaml` in your workstation.<br>
   Step 2: Take a backup of the existing kubeconfig. `cp ~/.kube/config ~/.kube/config.bak` <br>
-  Step 3: Merge the default config with `kubeadm-config.yaml` and export it to KUBECONFIG variable `export KUBECONFIG=~/.kube/config:/path/to/kubeadm-config.yaml`<br>
+  Step 3: Merge the default config with `kubeadm-config.yaml` and export it to KUBECONFIG variable<br>
+         `export KUBECONFIG=~/.kube/config:/path/to/kubeadm-config.yaml`<br>
   Step 4: Merger the configs to a file `kubectl config view --flatten > ~/.kube/merged_config.yaml`<br>
   Step 5: Replace the old config with the new config `mv ~/.kube/merged_config.yaml ~/.kube/config`<br>
   Step 6: List all the contexts `kubectl config get-contexts -o name`<br>
@@ -178,11 +179,80 @@ Nodes are individual instances of the Docker engine that control your cluster an
   kubectl delete servies --all
   kubectl delete deployments --all
   kubectl delete nodes --all
+  kubeadm reset
   ```
   ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/7bddd42d-013e-4359-a445-625bb886f9bf)<br>
 
 ## Docker Swarm  
 
+ Step-By-Step Implementation to Deploying Example web app using Docker Swarm
+
+### Prerequisites
+- Minimum two Ubuntu nodes [One Leader and one worker node]
+- Add the port  2377 to security group of nodes
+
+### Steps:
+
+-  Install docker with docker engine on all nodes
+   ```
+   sudo apt-get update -y
+   sudo apt install docker.io -y
+   ```
+   
+-  Now, Open the “Swarm Manager” node and run the command
+   ```
+   sudo docker swarm init
+   ```
+- This will be creating empty swarm<br><br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/f8040b75-8e62-41f2-89ce-237a584de88c)
+
+- After initializing the swarm on the “swarm-manager” node, there will be one key generated to add other nodes into the swarm as a worker. Copy and run that key on the rest of the servers.<br><br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/ef5fc1c8-999d-4ea0-a45d-e49a8d877e31)<br><br>
+  
+- To check about all the nodes in the manager, run this command `docker node ls`<br><br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/1de7ed12-50c7-4349-b87c-b95c552b7a74)<br><br>
+
+- Now, on Manager Node we will create a service,
+  ```
+  sudo docker service create --namename ipsr-app-service --replicas 2 --publish 8080:80 safuvanh/ipsr
+  ```
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/f285b7dd-a4ba-41f0-855f-25e8f3aaa018)
+
+- Now, this service will be running on all nodes. To check this, Copy the Ip Address of any of the nodes followed by port 8080. As  `<public ip of any instance>:8080`<br><br>
+  ![Screenshot (358)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/b372d3c7-f038-455e-bd00-0ed946eb8960)<br><br>
+  ![Screenshot (359)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/a24b4aae-5a55-4e2b-bbab-89f0a05c5446)<br>
+
+- Now, Iam trying to delete the running container and it will be created new container automatically<br><br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/6128c9bb-83b7-4c00-a5c2-62d5743e2e51)
+
+- If you want to remove any node from the environment,Run this command `sudo docker swarm leave` , As we removed, one of the workers and inside the status, we can see it’s down.<br><br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/f7f7f119-49ff-4246-9f46-b8a476a8328b)
+  <br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/807d5c05-3b46-4d97-bf9e-f0049823326b)
+
+- For deleting created docker service, Run this command
+  ```
+  sudo docker service rm <service-name>
+  ```
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/102db248-add5-40ce-b16d-8a2d244de523)
+
+  ## Conclusion
+
+  Choosing between Kubernetes and Docker Swarm depends on various factors such as project requirements, team expertise, scalability needs, and complexity tolerance. Kubernetes offers 
+  advanced features and scalability, making it suitable for large-scale deployments with complex requirements. On the other hand, Docker Swarm provides simplicity and ease of use, 
+  making it a preferred choice for smaller projects or teams with limited DevOps expertise. Evaluating these platforms based on your specific use case and considering factors like 
+  community support and integration capabilities will help you make the right decision for your container orchestration needs.
+  
+
+
+
+
+  
+
+
+
+  
+  
 
   
 
