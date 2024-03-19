@@ -52,6 +52,7 @@ Nodes are individual instances of the Docker engine that control your cluster an
    Step 3: Install CRI-O Runtime on all the nodes<br>
    Step 4: Install Kubeadm & Kubelet & Kubectl on all Nodes<br><br>
 - `vim kube.sh` and add all commands for these steps<br>
+   
    ![Screenshot (333)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/268dc76a-361e-48e9-962b-7c1c1720843e)
   
 - `chmod +x kube.sh && ./kube.sh` Run this shell script on both 2 nodes
@@ -65,17 +66,98 @@ Nodes are individual instances of the Docker engine that control your cluster an
 
   ![Screenshot (335)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/7dfb9404-9995-4ac9-b8f9-68367cbfe579)
 
-- Use the following commands from the output to create the kubeconfig in master so that you can use kubectl to interact with cluster API.
+- Use the following commands from the output to create the kubeconfig in master so that you can use kubectl to interact with cluster API.<br>
+  To start using your cluster, you need to run the following as a regular user:
 
   ```
+
   mkdir -p $HOME/.kube
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
   ```
+  <br>
+  Alternatively, if you are the root user, you can run:
+  ```
+   export KUBECONFIG=/etc/kubernetes/admin.conf
+   ```
 - You can get the cluster info using the following command.`kubectl cluster-info `
 
   ![Screenshot 2024-03-19 004838](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/5cbf8b9d-7f58-41a4-af0a-a05046c103c9)
+
+- By default, apps won’t get scheduled on the master node. If you want to use the master node for scheduling apps, taint the master node.
+
+  ### Join Worker Nodes To Kubernetes Master Node
+
+     
+- We have set up cri-o, kubelet, and kubeadm utilities on the worker nodes as well.
+- Copy the script file and create in worker node and run it.
+- Execute the following command in the master node to recreate the token with the join command.
+   ```
+  kubeadm token create --print-join-command
+  ```
+- This command performs the TLS bootstrapping for the nodes.
+  
+  ```
+  sudo kubeadm join 172.31.43.208:6443 --token j4eice.33vgvgyf5cxw4u8i \
+    --discovery-token-ca-cert-hash sha256:37f94469b58bcc8f26a4aa44441fb17196a585b37288f85e22475b00c36f1c61
+  ```
+  ![Screenshot 2024-03-19 092956](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/c7712c43-6d2d-4640-84c9-56bcf9308e39)
+
+- Now execute the kubectl command from the master node to check if the node is added to the master.`kubectl get nodes`<br>
+  ![Screenshot 2024-03-19 093318](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/8e088cb1-a765-4712-904f-9932153b9c1e)
+
+### Install Calico Network Plugin for Pod Networking
+
+- Kubeadm does not configure any network plugin. You need to install a network plugin of your choice for kubernetes [PodNetworking](https://kubernetes.io/docs/concepts/cluster-administration/addons/) and enable network policy
+- I am using the Calico network plugin for this setup.
+- Execute the following commands to install the [Calico](https://docs.tigera.io/calico/latest/about/) network plugin operator on the cluster.
+  ```
+  kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+  ```
+- Kubeadm doesn’t install metrics server component during its initialization. We have to install it separately.
+- To verify this, if you run the `kubectl top nodes` command, you will see the Metrics API not available error.
+- To install the metrics server, Explore the following metric server manifest file [Repository](https://github.com/kubernetes-sigs/metrics-server)<br>
+
+  ![Screenshot 2024-03-19 094932](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/2dfab6a3-3d1d-4fa6-8cdf-c7e36a37c620)
+
+### Deploy IPSR Application
+
+- Now that we have all the components to make the cluster and applications work, let’s deploy a sample IPSR Application and see if we can access it over a NodePort
+- Create a deployment `vim deployment.yml` It deploys the pod in the default namespace.<br>
+  ![Screenshot (340)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/23cc6d3b-0d19-439a-9676-8184667bb9dc)
+
+- Execute the following command for create and view deployment<br>
+  ```
+  kubectl create -f deployment.yml
+  kubectl get deployments
+  ```
+  
+
+- Expose the Nginx deployment on a NodePort 32000
+- Create a service for the ipsr app `vim service.yml` <br>
+  ![Screenshot (342)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/3156c98a-f51b-4c1a-aa70-9d3d7407854f)<Br>
+- Add this port Number to node Security group 
+
+- Execute the following command for create and view Services
+  ```
+  kubectl create -f service.yml
+  kubectl get services
+  ```
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/10aa6e80-8c3b-4d40-9ee5-db96f0241af1)<br>
+- Check the pod status using the following command.`kubectl get pods`
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/c3217373-b724-44cf-8dc8-a017ff271e8f)<br>
+- Once the deployment is up, you should be able to access the IPSR home page on the allocated NodePort.Copy the Workernode Public ip and acces it on Alllocated port 
+  ![Screenshot (348)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/942ed6b3-8d07-4f16-af57-0c71d0248048)<br><br>
+  ![Screenshot (347)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/d2a2a6b8-8185-4f02-97d6-889ddcaab15b)
+
+
+
+  
+  
+
+  
+  
 
   
 
