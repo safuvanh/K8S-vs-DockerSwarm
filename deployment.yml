@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ipsr-deployment
+spec:
+  selector:
+    matchLabels:
+      app: ipsr
+  replicas: 2 
+  template:
+    metadata:
+      labels:
+        app: ipsr
+    spec:
+      containers:
+      - name: ipsr
+        image: safuvanh/ipsr:latest
+        ports:
+        - containerPort: 80    
