@@ -77,7 +77,8 @@ Nodes are individual instances of the Docker engine that control your cluster an
 
   ```
   <br>
-  Alternatively, if you are the root user, you can run:
+  Alternatively, if you are the root user, you can run:<br>
+  
    ```
    export KUBECONFIG=/etc/kubernetes/admin.conf
    ```
