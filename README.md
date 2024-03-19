@@ -87,7 +87,10 @@ Nodes are individual instances of the Docker engine that control your cluster an
 
 - By default, apps won’t get scheduled on the master node. If you want to use the master node for scheduling apps, taint the master node.
 
-  ### Join Worker Nodes To Kubernetes Master Node
+### Kubernetes Cluster Important Configurations 
+   ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/eaf5bb45-9293-48b4-ade5-009c7f404000)
+
+### Join Worker Nodes To Kubernetes Master Node
 
      
 - We have set up cri-o, kubelet, and kubeadm utilities on the worker nodes as well.
@@ -124,8 +127,8 @@ Nodes are individual instances of the Docker engine that control your cluster an
 ### Deploy IPSR Application
 
 - Now that we have all the components to make the cluster and applications work, let’s deploy a sample IPSR Application and see if we can access it over a NodePort
-- Create a deployment `vim deployment.yml` It deploys the pod in the default namespace.<br>
-  ![Screenshot (340)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/23cc6d3b-0d19-439a-9676-8184667bb9dc)
+- Create a deployment `vim deployment.yml` It deploys the pod in the default namespace.<br><br>
+  ![Screenshot (340)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/23cc6d3b-0d19-439a-9676-8184667bb9dc)<br>
 
 - Execute the following command for create and view deployment<br>
   ```
@@ -136,7 +139,7 @@ Nodes are individual instances of the Docker engine that control your cluster an
 
 - Expose the Nginx deployment on a NodePort 32000
 - Create a service for the ipsr app `vim service.yml` <br>
-  ![Screenshot (342)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/3156c98a-f51b-4c1a-aa70-9d3d7407854f)<Br>
+  ![Screenshot (342)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/3156c98a-f51b-4c1a-aa70-9d3d7407854f)<Br><br>
 - Add this port Number to node Security group 
 
 - Execute the following command for create and view Services
@@ -144,12 +147,44 @@ Nodes are individual instances of the Docker engine that control your cluster an
   kubectl create -f service.yml
   kubectl get services
   ```
-  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/10aa6e80-8c3b-4d40-9ee5-db96f0241af1)<br>
-- Check the pod status using the following command.`kubectl get pods`
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/10aa6e80-8c3b-4d40-9ee5-db96f0241af1)<br><br>
+- Check the pod status using the following command.`kubectl get pods`<br><br>
   ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/c3217373-b724-44cf-8dc8-a017ff271e8f)<br>
-- Once the deployment is up, you should be able to access the IPSR home page on the allocated NodePort.Copy the Workernode Public ip and acces it on Alllocated port 
+- Once the deployment is up, you should be able to access the IPSR home page on the allocated NodePort.Copy the Workernode Public ip and acces it on Alllocated port<br>
+
   ![Screenshot (348)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/942ed6b3-8d07-4f16-af57-0c71d0248048)<br><br>
-  ![Screenshot (347)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/d2a2a6b8-8185-4f02-97d6-889ddcaab15b)
+  ![Screenshot (347)](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/d2a2a6b8-8185-4f02-97d6-889ddcaab15b)<br>
+
+- Now, Iam trying to delete the running pods and it will be created new pods automatically<br><br>
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/48599f59-3042-4837-ba7d-a6ef880d2731)
+
+### Add Kubeadm Config to Workstation
+- If you prefer to connect the Kubeadm cluster using kubectl from your workstation, you can merge the kubeadm `admin.conf` with your existing kubeconfig file.
+- Follow the steps given below for the configuration.
+  Step 1: Copy the contents of `admin.conf` from the control plane node and save it in a file named `kubeadm-config.yaml` in your workstation.<br>
+  Step 2: Take a backup of the existing kubeconfig. `cp ~/.kube/config ~/.kube/config.bak` <br>
+  Step 3: Merge the default config with `kubeadm-config.yaml` and export it to KUBECONFIG variable `export KUBECONFIG=~/.kube/config:/path/to/kubeadm-config.yaml`<br>
+  Step 4: Merger the configs to a file `kubectl config view --flatten > ~/.kube/merged_config.yaml`<br>
+  Step 5: Replace the old config with the new config `mv ~/.kube/merged_config.yaml ~/.kube/config`<br>
+  Step 6: List all the contexts `kubectl config get-contexts -o name`<br>
+  Step 7: Set the current context to the kubeadm cluster. `kubectl config use-context <cluster-name-here>`<br>
+- Now, you should be able to connect to the Kubeadm cluster from your local workstation kubectl utility.
+
+
+### Destroy Created Services
+
+- ```
+  kubectl delete pods --all
+  kubectl delete servies --all
+  kubectl delete deployments --all
+  kubectl delete nodes --all
+  ```
+  ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/7bddd42d-013e-4359-a445-625bb886f9bf)<br>
+
+## Docker Swarm  
+
+
+  
 
 
 
