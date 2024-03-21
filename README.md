@@ -87,6 +87,9 @@ Nodes are individual instances of the Docker engine that control your cluster an
   ![Screenshot 2024-03-19 004838](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/5cbf8b9d-7f58-41a4-af0a-a05046c103c9)
 
 - By default, apps won’t get scheduled on the master node. If you want to use the master node for scheduling apps, taint the master node.
+  ```
+  kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+  ```
 
 ### Kubernetes Cluster Important Configurations 
    ![image](https://github.com/safuvanh/K8S-vs-DockerSwarm/assets/156053146/eaf5bb45-9293-48b4-ade5-009c7f404000)
